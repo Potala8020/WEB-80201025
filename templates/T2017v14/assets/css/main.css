@@ -9375,7 +9375,7 @@ textarea.c-input {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
-  height: 70px;
+  height: 90px;
   /* [1] */
   padding-left: 1.875rem;
   border-bottom: 1px solid #2a3547;
