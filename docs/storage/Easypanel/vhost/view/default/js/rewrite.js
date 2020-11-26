@@ -51,8 +51,8 @@ function help()
 }
 function example()
 {
-	document.getElementById('host').value = 'qiangidc.com';
-	document.getElementById('dst').value = 'www.qiangidc.com';
+	document.getElementById('host').value = 'www.kanglesoft.com';
+	document.getElementById('dst').value = 'kanglesoft.com';
 	close_msg();
 }
 function close_msg()

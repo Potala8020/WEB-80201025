@@ -37,19 +37,21 @@
 	}
 	function banip(ip)
 	{
-		var i = ip.substr(0,ip.indexOf(":"));
+		if(ip.indexOf(":")>0){
+			ip = ip.substr(0,ip.indexOf(":"));
+		}
 		var life_time = prompt("禁止时间:分钟(0为永久)",'0');
 		if (life_time == "") {
 			life_time = 60;
 		}
-		var url ="?c=banip&a=addBanip&ajax=1&ip=" + i + "&life_time=" + life_time;
+		var url ="?c=banip&a=addBanip&ajax=1&ip=" + ip + "&life_time=" + life_time;
 		jQuery.get(url,function (msg) {
 			if (msg != '成功') {
 				alert(msg);
 			}
 			window.location.reload();
 		});
-	}		
+	}
 	function sortRequest(a,b)
 	{
 		if (sortIndex==2) {	

@@ -1,11 +1,19 @@
+var replace = 0;
 function domain_add()
 {
 	var domain = $("#domain").val();
 	var subdir = $("#subdir").val();
+	var proto = $("#proto").val();
+	if(domain == ''){
+		return alert('域名不能为空');
+	}
+	if($("#proto").length>0 && subdir==''){
+		return alert('源站IP不能为空');
+	}
 	$.ajax({
 		type:'POST',
 		url: '?c=domain&a=add',
-		data:'domain=' + domain + '&subdir=' + subdir,
+		data:'domain=' + domain + '&subdir=' + subdir + '&proto=' + proto + '&replace=' + replace,
 		async:false,
 		success:function(msg){
 			if (msg != "成功"){
@@ -17,14 +25,14 @@ function domain_add()
 			show_sync();
 			window.location = window.location;
 		}
-	});	
+	});
 }
 var dialog = null;
 function piao_domain_import()
 {
 	var html = '<div>覆盖:<input id="replace" name="replace" type=checkbox value=1 checked></div>';
-		html += '<div class="piao_div">一行一个，域名和IP(或目录)用空格分割，如下格式</div>';
-		html += '<div class="piao_div"><textarea id="domain_import_value" rows=10 cols=60 placeholder="www.qiangidc.com wwwroot"></textarea>';
+		html += '<div class="piao_div">一行一个，域名和IP(或目录)用空格分割</div>';
+		html += '<div class="piao_div"><textarea id="domain_import_value" rows=10 cols=60 placeholder="www.cdn.com 192.168.1.2"></textarea>';
 		html += '<div><input type=button class="btn btn-warning" value="导入" onclick="domain_import()"></div>';
 		var d = art.dialog({id:'domain_import'});
 		d.title('批量添加域名绑定');
@@ -111,4 +119,37 @@ function domain_del(val,id)
 		}
 	});
 	
+}
+function domain_edit(val)
+{
+	$.ajax({
+		type:'GET',
+		url: '?c=domain&a=info&domain=' + val,
+		dataType: "json",
+		success:function(data){
+			if(data.code == 0){
+				$("#domain").val(val);
+				$("#domain").attr("disabled", true);
+				$("#subdir").val(data.subdir);
+				$("#proto").val(data.proto);
+				$("#button_import").hide();
+				$("#button_cancel").show();
+				replace = 1;
+			}else{
+				return alert(data.msg);
+			}
+		}
+	});
+}
+function cancel_edit(val)
+{
+	$("#domain").val("");
+	$("#domain").attr("disabled", false);
+	if($("#proto").length>0){
+		$("#subdir").val("");
+		$("#proto").val('http');
+	}
+	$("#button_import").show();
+	$("#button_cancel").hide();
+	replace = 0;
 }
