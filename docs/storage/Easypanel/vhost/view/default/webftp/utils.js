@@ -4,7 +4,7 @@
 	var xxkf_ie =  (document.all) ? true : false; 
 	function UrlEncode(str) {
 		var ret = "";
-		var strSpecial = "!\"#$%&'()*+,/:;<=>?[]^`{|}~%";
+		//var strSpecial = "!\"#$%&'()*+,/:;<=>?[]^`{|}~%";
 		for ( var i = 0; i < str.length; i++) {
 			var chr = str.charAt(i);
 			if (chr == '+') {
@@ -19,33 +19,41 @@
 	 * 文件编辑
 	 * @param file
 	 */
-	function editfrom(file)
+	function editfrom(files)
 	{
-		var jq = jQuery.noConflict();
 		var editurl = "?c=webftp&a=editfrom";
-		var posturl = "file="+file;
+		var posturl = "file="+files;
+		var msg = '<div class="main webftp"  id="editfile" >';
+		msg += '<textarea name="content" id="content" >正在载入...</textarea>';
+		msg += '<br><input align="center" class="btn btn-warning" value="保存" style="width:160px;height:28px;" onClick="editsave(\'on\')" type="button">';
+		msg += '</div>';
+		var dlog = art.dialog({id:'id22',content:'',title:'编辑'+files+'文件',width:'800px',height:'auto',lock:true,top:'0px'});
+		//dlog.position("200px",0);
+		dlog.content(msg);
+		var div = jQuery("#editfile");
 		jq.ajax({url:editurl,type:'get',dataType:"json",data:posturl,
 			success:function(ret){
 				if (ret['code'] != 200) {
+					dlog.close();
 					alert(ret['msg'] ? ret['msg'] : '编辑文件异常');
 					return;
 				}
-				var content = ret['content'];
-				var charset = ret['charset'];
 				var filename = ret['filename'];
-				var msg = '<div  id=editfile>';
-				msg += '<input name="charset" type="hidden" id="charset" value="' + charset + '">';
-				msg += '<input name="filecwd" id="filecwd" type="hidden" value="' + filename + '">';
-				msg += '<textarea name="content" id=content >' + decodeURIComponent(content) + '</textarea>';
-				msg += '<br><input align=center value="保存" style="width:160px;" onClick=editsave("on") type="button">';
-				msg += '</div>';
-				var dlog = art.dialog({id:'id22',content:'',title:'编辑文件',width:'800px',height:'auto',lock:true,left:'0px',top:'0px;'});
-				dlog.content(msg);
-				jQuery('#content').css('width',jQuery(window).width()-100).css('height',jQuery("body").height())
-				
+				var charset = ret['charset'];
+				div.append('<input name="charset" type="hidden" id="charset" value="' +charset + '">');
+				div.append('<input name="filecwd" id="filecwd" type="hidden" value="' + filename + '">');
+				var content = ret['content'];
+				var c = div.find("#content");
+				//c.css('width',jQuery(window).width()-300).css('height',window.screen.height-400);
+				c.css('width',"1000px").css('height',"760px");
+				var ret = decodeURIComponent(content);
+				c.val(ret);
+			},
+			error:function(e) {
+				dlog.close();
+				alert(e.responseText);
 			}
 		});
-		
 	}
 	/**
 	 * 文件保存
@@ -58,7 +66,7 @@
 		var charset = jq("#charset").val();
 		var filename = jq("#filecwd").val();
 		var editurl = "?c=webftp&a=editsave";
-		var posturl = "content=" + UrlEncode(content) + "&charset=" + charset + "&filename=" + filename;
+		var posturl = "content=" + encodeURIComponent(content) + "&charset=" + charset + "&filename=" + filename;
 		jq.ajax({url:editurl,type:'post',dataType:'html',data:posturl,
 			success:function(data){
 				alert(data);
@@ -72,12 +80,12 @@
 	function addwget(dir)
 	{
 		var msg = '<div id="wget">';
-		msg += '<form name="wget" action="?c=shell&a=wget" method="post" target=_blank >';
+		msg += '<form name="wget" action="?c=shell&a=wget" method="post" target="_blank" >';
 		msg += '下载地址:<input name="url" id="wgeturl" size=60><br><br>';
-		msg += '存放文件名:<input name="filename" size=46>';
-		msg += '&nbsp;断点续传:<input name="-c" type="checkbox" value="1">';
+		msg += '新文件名:<input name="filename" size=46><br><br>';
+		msg += '断点续传:<input name="-c" type="checkbox" value="1"><br><br>';
 		msg += '<input name="dir" id="wgetdir" type="hidden">';
-		msg += '&nbsp;&nbsp;<input type="submit" value="提交">';
+		msg += '<input type="submit" style="width:100px" value="提交">';
 		msg += '</form></div>';
 		var dlog = art.dialog({id:'id22',content:'',title:'下载文件',lock:true});
 		dlog.content(msg);
@@ -91,7 +99,7 @@
 	{
 		var msg = '<form name="mkdir" onSubmit="return addmkdir()">';
 			msg += '目录名: <input name="dir" id="mkdirvalue" size="20">';
-		msg += '<input value="确定"	onClick="addmkdir()" type="button">';
+		msg += '<input value="确定" style="width:100px"	onClick="addmkdir()" type="button">';
 		msg += '</form>';
 		var dlog = art.dialog({id:'id22',content:'',title:'创建目录',lock:true});
 		dlog.content(msg);
@@ -127,21 +135,21 @@
 	 */
 	function rename(file) 
 	{
-		var msg = '<form name="rename" action="javascript:addrename("' + file + '")>';
-			msg += '新文件名:<input name="newname" id="renamefile" >';
-			msg += '<input value="确定" onClick=addrename("' + file + '") type="button">';
+		var msg = '<form name="rename" action="javascript:addrename(\'' + file + '\')">';
+			msg += '新文件名:<input style="height:32px;line-height:32px;padding:0px;font-size:16px" name="newname" id="renamefile" >';
+			msg += '<input value="确定" style="width:80px;height:32px;" onClick="addrename(\'' + file + '\')" type="button">';
 			msg += '</form>';
 		var dlog = art.dialog({id:'id22',content:msg,title:'',lock:true});
 		dlog.title('重命名文件' + file);
 		document.getElementById('renamefile').focus();
 		document.getElementById('renamefile').value = file;
 		var leng = file.length;
-		jQuery('#renamefile').css('width',leng*8+120)
+		jQuery('#renamefile').css('width',leng*13+120);
 	}
 	function show_upload_msg()
 	{
 		var msg = "可将多个文件或目录压缩成zip或7z格式(rar不支持)上传<br>上传后在文件后面会提解压的按钮，点击解压即可.";
-		art.dialog({id:'show_upload_msg',content:msg,title:'小纸条',});
+		art.dialog({id:'show_upload_msg',content:msg,title:'小纸条'});
 	}
 	/**
 	 * 文件上传
@@ -149,11 +157,9 @@
 	function upload() 
 	{
 		var msg = '<div id="upload">';
+		msg += "<p><i>可以上传压缩包文件后解压，当前支持格式为<b>.7z</b>和<b>.zip</b></i></p>";
 		msg += '<form name="upform" enctype="multipart/form-data" action="?c=webftp&a=upsave" method="post">';
-		msg += '本地文件:<input name="myfile" size=50 type="file">';
-		msg += '<input value="上传" type="Submit">';
-		msg += '<input value="清空"  type="reset">';
-		msg += '<input value="上传多个" type="button" onclick="show_upload_msg()">';
+		msg += '本地文件:<input name="myfile" size=50 type="file">&nbsp;&nbsp;<input style="width:100px" value="上传" type="Submit"><br><br>';
 		msg += '</form></div>';
 		var dlog = art.dialog({id:'id22',content:'',title:'',lock:true});
 		dlog.content(msg);
@@ -202,14 +208,14 @@
 			return;
 		}
 		var zipfilename = last_file + ".zip";
-		var msg = '<form name="compress" action=javascript:addzipfile()">';
+		var msg = '<form name="compress" action="javascript:addzipfile()">';
 		msg += '文件:<input name="dst" id="compressdst" value=' + zipfilename + '><br><br>';
-		msg += '密码:<input name="password" id="compresspassword" ><br>';
-		msg += '<input value="压缩" onClick="addzipfile()" type="button">';
+		msg += '密码:<input name="password" id="compresspassword" ><br><br>';
+		msg += '<input style="width:100px;" value="压缩" onClick="addzipfile()" type="button">';
 		msg += '</form>';
 		art.dialog({id:'id22',content:msg,title:'压缩文件',lock:true});
 		document.getElementById('compresspassword').focus();
-		jQuery('#compressdst').css('width',(zipfilename.length * 8)+120)
+		jQuery('#compressdst').css('width',(zipfilename.length * 12));
 	}
 	/**
 	 * 文件解压
@@ -217,10 +223,10 @@
 	 */
 	function decompress(file)
 	{
-		var msg = '<form name="decompress" onSubmit=\'return addunzipfile("' + file + '")"\'>';
+		var msg = '<form name="decompress" onSubmit="return addunzipfile(\'' + file + '\')">';
 			msg += '<div >解压目录:<input name="dst" id="decompressdst"></div>';
-			msg += '<div style="margin-top:10px;">密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码:<input name="password" id="decompresspassword"></div>';
-			msg += '<div style="margin-top:10px;"><input value="解压" style="margin-left:60px;width:160px;" onClick=addunzipfile("' + file + '") type="button">';
+			msg += '<div style="margin-top:10px;">密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码:<input name="password" id="decompresspassword" placeholder="没有请留空"></div>';
+			msg += '<div style="margin-top:10px;"><input value="解压" style="margin-left:60px;width:160px;" onClick="addunzipfile(\'' + file + '\')" type="button">';
 			msg += '</form>';
 		art.dialog({id:'id22',content:msg,title:'',lock:true});
 		document.getElementById('decompressdst').value = cwd ? cwd : '/'; 
@@ -248,21 +254,21 @@
 	function file_access(file,is_dir,action)
 	{
 		var msg = '<form name="file_access_form" action="?c=webftp&a=fileaccess" method="post">';
-			msg += '<input type="hidden" name="file" id="accessfile" >';
-			msg += '<input type="hidden" name="is_dir" id="is_dir" >';
-			msg += '<input type="radio"	name="action" id="clear" value="clear">清除<br>';
-			msg += '<input type="radio"	name="action" id="deny" value="deny">锁定<br>';
-			msg += '<input type="radio"	name="action" id="static" value="static">静态<br>';
-			msg += '<input type="radio" name="action" id="auth" value="auth">http认证(允许用户,正则)';
-			msg += '<input name="auth_user" onclick="file_access_form.action[3].checked=true"><br>';
-			msg += '<input type="radio" name="action" id="ip" value="ip">允许ip段(cidr格式,多个由,分开)';
-			msg += '<input size=32 name="ip" onclick="file_access_form.action[4].checked=true"><br>';
-			msg += '<input type="submit" value="设置">';
+			msg += '<input type="hidden" name="file" id="accessfile" />';
+			msg += '<input type="hidden" name="is_dir" id="is_dir" />';
+			msg += '<p><input type="radio"	name="act" id="clear" value="clear"/>清除</p>';
+			msg += '<p><input type="radio"	name="act" id="deny" value="deny"/>锁定</p>';
+			msg += '<p><input type="radio"	name="act" id="static" value="static"/>静态</p>';
+			msg += '<p><input type="radio"  name="act" id="authuser" value="auth"/>http认证';
+			msg += '<input size=32 name="auth_user"  id="auth_user" onclick="file_access_form.act[3].checked=true">(允许用户,正则)</p>';
+			msg += '<p><input type="radio" name="act" id="ip" value="ip" >允许ip段';
+			msg += '<input size=32 name="ip" id="ip_value" onclick="file_access_form.act[4].checked=true">(cidr格式,多个由,分开)</p>';
+			msg += '<p><input type="submit" value="设置" style="width:100px;"></p>';
 			msg += '</form>';
 		art.dialog({id:'id22',content:msg,title:'设置文件或目录属性',lock:true});	
 		document.getElementById('accessfile').value = file;
 		document.getElementById('is_dir').value = is_dir;
-		document.getElementById('auth').value = "";
+		document.getElementById('auth_user').value = "";
 		if (action=='') {
 			document.getElementById('clear').checked = true;
 		} else if (action=='deny'){
@@ -270,11 +276,11 @@
 		} else if (action=='static') {
 			document.getElementById('static').checked = true;
 		} else 	if (action.substr(0,5)=='auth:') {
-			document.getElementById('auth').checked = true;
-			document.getElementById('auth').value = action.substr(5);
+			document.getElementById('authuser').checked = true;
+			document.getElementById('auth_user').value = action.substr(5);
 		} else 	if (action.substr(0,3)=='ip:') {
 			document.getElementById('ip').checked = true;
-			document.getElementById('ip').value = action.substr(3);
+			document.getElementById('ip_value').value = action.substr(3);
 		}
 		//show_div('file_access', true);
 	}
