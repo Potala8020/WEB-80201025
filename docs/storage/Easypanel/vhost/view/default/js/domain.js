@@ -31,7 +31,7 @@ var dialog = null;
 function piao_domain_import()
 {
 	var html = '<div>覆盖:<input id="replace" name="replace" type=checkbox value=1 checked></div>';
-		html += '<div class="piao_div">一行一个，域名和IP(或目录)用空格分割</div>';
+		html += '<div class="piao_div">一行一个，域名或IP与需要绑定的目录，用空格分割</div>';
 		html += '<div class="piao_div"><textarea id="domain_import_value" rows=10 cols=60 placeholder="www.qiangidc.com wwwroot"></textarea>';
 		html += '<div><input type=button class="btn btn-warning" value="导入" onclick="domain_import()"></div>';
 		var d = art.dialog({id:'domain_import'});
